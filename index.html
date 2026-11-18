@@ -1,1 +1,291 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>47都道府県アキネーター</title>
+<style>
+  :root {
+    --primary: #ff6b6b;
+    --primary-hover: #fa5252;
+    --secondary: #4dabf7;
+    --secondary-hover: #339af0;
+    --unknown: #adb5bd;
+    --unknown-hover: #868e96;
+    --bg-gradient: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+    --card-bg: #ffffff;
+    --text-color: #2d3748;
+  }
 
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg-gradient);
+    min-height: 100vh;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--text-color);
+  }
+
+  .game-container {
+    background: var(--card-bg);
+    width: 92%;
+    max-width: 500px;
+    padding: 35px 25px;
+    border-radius: 24px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+    text-align: center;
+    box-sizing: border-box;
+    animation: fadeIn 0.4s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .header-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    font-size: 13px;
+    font-weight: bold;
+  }
+
+  .badge {
+    background-color: #fff0f0;
+    color: var(--primary);
+    padding: 5px 12px;
+    border-radius: 20px;
+  }
+
+  .count-badge {
+    background-color: #edf2f7;
+    color: #4a5568;
+    padding: 5px 12px;
+    border-radius: 20px;
+  }
+
+  .progress-bar-bg {
+    width: 100%;
+    height: 8px;
+    background-color: #edf2f7;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 25px;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4dabf7, #ff6b6b);
+    width: 5%;
+    transition: width 0.3s ease;
+  }
+
+  h1 {
+    font-size: 18px;
+    margin: 0 0 10px 0;
+    color: #718096;
+  }
+
+  #question {
+    font-size: 21px;
+    font-weight: 800;
+    line-height: 1.5;
+    margin: 20px 0 35px 0;
+    min-height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1a202c;
+  }
+
+  .button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .main-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+  }
+
+  button {
+    font-size: 17px;
+    font-weight: bold;
+    padding: 15px 0;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: transform 0.1s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  button:active {
+    transform: scale(0.96);
+  }
+
+  .yes-btn {
+    background-color: var(--primary);
+    color: white;
+    flex: 1;
+    box-shadow: 0 4px 10px rgba(255, 107, 107, 0.25);
+  }
+  .yes-btn:hover { background-color: var(--primary-hover); }
+
+  .no-btn {
+    background-color: var(--secondary);
+    color: white;
+    flex: 1;
+    box-shadow: 0 4px 10px rgba(77, 171, 247, 0.25);
+  }
+  .no-btn:hover { background-color: var(--secondary-hover); }
+
+  .unknown-btn {
+    background-color: #f1f3f5;
+    color: #495057;
+    font-size: 14px;
+    padding: 10px;
+  }
+  .unknown-btn:hover { background-color: #e9ecef; }
+
+  .reset-btn {
+    background-color: #2d3748;
+    color: white;
+    width: 100%;
+    margin-top: 15px;
+    display: none;
+  }
+  .reset-btn:hover { background-color: #1a202c; }
+
+  .result-box {
+    animation: popUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .result-pref {
+    color: var(--primary);
+    font-size: 32px;
+    display: block;
+    margin: 10px 0;
+  }
+
+  .result-desc {
+    font-size: 14px;
+    color: #718096;
+    font-weight: normal;
+  }
+
+  @keyframes popUp {
+    0% { transform: scale(0.8); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+</style>
+</head>
+<body>
+
+<div class="game-container">
+  <div class="header-info">
+    <span class="badge" id="q-num">第 1 問</span>
+    <span class="count-badge" id="remain-count">残り候補: 47都道府県</span>
+  </div>
+  
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="progress"></div>
+  </div>
+
+  <h1>あなたの住んでいる都道府県を当てます！</h1>
+  <div id="question">読み込み中...</div>
+  
+  <div class="button-group" id="buttons">
+    <div class="main-buttons">
+      <button class="yes-btn" onclick="answer(true)">はい</button>
+      <button class="no-btn" onclick="answer(false)">いいえ</button>
+    </div>
+    <button class="unknown-btn" onclick="answer(null)">わからない / どちらでもない</button>
+  </div>
+  
+  <button id="reset" class="reset-btn" onclick="resetGame()">最初からもう一度遊ぶ</button>
+</div>
+
+<script>
+  // 47都道府県データベース
+  const prefectures = [
+    { name: "北海道", east: true, sea: true, island: true, snow: true, bigCity: true, shinkansen: true, worldHeritage: true, desc: "でっかいどう！海鮮と大自然の王国" },
+    { name: "青森県", east: true, sea: true, honshu: true, snow: true, shinkansen: true, apple: true, worldHeritage: true, desc: "りんご生産量日本一＆ねぶた祭り！" },
+    { name: "岩手県", east: true, sea: true, honshu: true, snow: true, shinkansen: true, worldHeritage: true, desc: "本州最大の面積！わんこそばと平泉" },
+    { name: "宮城県", east: true, sea: true, honshu: true, snow: true, bigCity: true, shinkansen: true, desc: "東北最大の都市・仙台！牛タンとずんだ" },
+    { name: "秋田県", east: true, sea: true, honshu: true, snow: true, shinkansen: true, worldHeritage: true, desc: "なまはげときりたんぽ、秋田美人！" },
+    { name: "山形県", east: true, sea: true, honshu: true, snow: true, shinkansen: true, fruit: true, desc: "さくらんぼの王様！温泉王国" },
+    { name: "福島県", east: true, sea: true, honshu: true, snow: true, shinkansen: true, fruit: true, desc: "桃が美味しい！会津と猪苗代湖" },
+    { name: "茨城県", east: true, sea: true, honshu: true, kanto: true, natto: true, desc: "納豆とメロンが有名！牛久大仏もあるよ" },
+    { name: "栃木県", east: true, sea: false, honshu: true, kanto: true, shinkansen: true, worldHeritage: true, desc: "日光東照宮と宇都宮餃子！" },
+    { name: "群馬県", east: true, sea: false, honshu: true, kanto: true, shinkansen: true, onsen: true, desc: "草津温泉とこんにゃくパーク！" },
+    { name: "埼玉県", east: true, sea: false, honshu: true, kanto: true, bigCity: true, shinkansen: true, desc: "ダ埼玉なんて言わせない！住みやすさ抜群" },
+    { name: "千葉県", east: true, sea: true, honshu: true, kanto: true, bigCity: true, themePark: true, desc: "夢の国と成田空港！落花生も有名" },
+    { name: "東京都", east: true, sea: true, honshu: true, kanto: true, bigCity: true, shinkansen: true, worldHeritage: true, desc: "日本の首都！なんでも揃う大都会" },
+    { name: "神奈川県", east: true, sea: true, honshu: true, kanto: true, bigCity: true, shinkansen: true, onsen: true, desc: "横浜・鎌倉・箱根！魅力たっぷり" },
+    { name: "新潟県", east: true, sea: true, honshu: true, snow: true, shinkansen: true, rice: true, desc: "お米とお酒が日本一クラス！佐渡島もあるよ" },
+    { name: "富山県", east: false, sea: true, honshu: true, snow: true, shinkansen: true, worldHeritage: true, desc: "立山黒部アルペンルートと新鮮な海の幸！" },
+    { name: "石川県", east: false, sea: true, honshu: true, snow: true, shinkansen: true, desc: "金沢の兼六園と金箔ソフト！" },
+    { name: "福井県", east: false, sea: true, honshu: true, snow: true, shinkansen: true, dinosaur: true, desc: "恐竜博物館と東尋坊！幸福度ランキング常連" },
+    { name: "山梨県", east: true, sea: false, honshu: true, fuji: true, fruit: true, worldHeritage: true, desc: "富士山とぶどう・桃！ほうとうも最高" },
+    { name: "長野県", east: true, sea: false, honshu: true, snow: true, shinkansen: true, apple: true, desc: "日本の屋根！軽井沢と信州そば" },
+    { name: "岐阜県", east: false, sea: false, honshu: true, shinkansen: true, worldHeritage: true, desc: "白川郷と飛騨牛！日本のど真ん中" },
+    { name: "静岡県", east: true, sea: true, honshu: true, fuji: true, shinkansen: true, tea: true, worldHeritage: true, desc: "富士山とお茶、そしてさわやかのハンバーグ！" },
+    { name: "愛知県", east: false, sea: true, honshu: true, bigCity: true, shinkansen: true, car: true, desc: "モノづくり王国！味噌カツとひつまぶし" },
+    { name: "三重県", east: false, sea: true, honshu: true, shrine: true, desc: "伊勢神宮と鈴鹿サーキット！松阪牛も" },
+    { name: "滋賀県", east: false, sea: false, honshu: true, kansai: true, shinkansen: true, lake: true, desc: "日本一の琵琶湖！面積の6分の1が湖" },
+    { name: "京都府", east: false, sea: true, honshu: true, kansai: true, bigCity: true, shinkansen: true, tea: true, worldHeritage: true, desc: "千年の都！世界が憧れる観光都市" },
+    { name: "大阪府", east: false, sea: true, honshu: true, kansai: true, bigCity: true, shinkansen: true, themePark: true, worldHeritage: true, desc: "食い倒れの街！たこ焼き・お好み焼き・USJ" },
+    { name: "兵庫県", east: false, sea: true, honshu: true, kansai: true, bigCity: true, shinkansen: true, onsen: true, worldHeritage: true, desc: "神戸の夜景に姫路城、有馬温泉まで！" },
+    { name: "奈良県", east: false, sea: false, honshu: true, kansai: true, deer: true, worldHeritage: true, desc: "大仏様と鹿せんべい！歴史の宝庫" },
+    { name: "和歌山県", east: false, sea: true, honshu: true, kansai: true, fruit: true, worldHeritage: true, desc: "みかんと梅干し日本一！パンダもいるよ" },
+    { name: "鳥取県", east: false, sea: true, honshu: true, sand: true, desc: "鳥取砂丘と二十世紀梨！星空もきれい" },
+    { name: "島根県", east: false, sea: true, honshu: true, shrine: true, worldHeritage: true, desc: "縁結びの出雲大社と石見銀山！" },
+    { name: "岡山県", east: false, sea: true, honshu: true, shinkansen: true, fruit: true, desc: "晴れの国！桃太郎と倉敷美観地区" },
+    { name: "広島県", east: false, sea: true, honshu: true, bigCity: true, shinkansen: true, worldHeritage: true, desc: "厳島神社とお好み焼き！もみじ饅頭も" },
+    { name: "山口県", east: false, sea: true, honshu: true, shinkansen: true, worldHeritage: true, desc: "本州最西端！ふぐと角島大橋" },
+    { name: "徳島県", east: false, sea: true, shikoku: true, dance: true, desc: "阿波おどりと鳴門の渦潮！すだちも有名" },
+    { name: "香川県", east: false, sea: true, shikoku: true, udon: true, desc: "うどん県！日本一面積が小さいけど魅力ぎっしり" },
+    { name: "愛媛県", east: false, sea: true, shikoku: true, fruit: true, onsen: true, desc: "みかんと道後温泉！しまなみ海道も最高" },
+    { name: "高知県", east: false, sea: true, shikoku: true, fish: true, desc: "カツオのたたきと四万十川！坂本龍馬の故郷" },
+    { name: "福岡県", east: false, sea: true, kyushu: true, bigCity: true, shinkansen: true, ramen: true, worldHeritage: true, desc: "九州最大の都市！博多ラーメンと明太子" },
+    { name: "佐賀県", east: false, sea: true, kyushu: true, shinkansen: true, ceramic: true, desc: "有田焼・伊万里焼と吉野ヶ里遺跡！" },
+    { name: "長崎県", east: false, sea: true, kyushu: true, shinkansen: true, themePark: true, worldHeritage: true, desc: "ハウステンボスとちゃんぽん！島の数は日本一" },
+    { name: "熊本県", east: false, sea: true, kyushu: true, bigCity: true, shinkansen: true, ramen: true, desc: "くまモンと阿蘇山！馬刺しも絶品" },
+    { name: "大分県", east: false, sea: true, kyushu: true, onsen: true, desc: "おんせん県！別府と湯布院の湯けむり" },
+    { name: "宮崎県", east: false, sea: true, kyushu: true, fruit: true, desc: "南国リゾート！マンゴーとチキン南蛮" },
+    { name: "鹿児島県", east: false, sea: true, kyushu: true, shinkansen: true, worldHeritage: true, desc: "桜島と黒豚！屋久島もあるよ" },
+    { name: "沖縄県", east: false, sea: true, island: true, worldHeritage: true, desc: "美ら海と南国の楽園！ソーキそば" }
+  ];
+
+  // 質問リスト
+  const questions = [
+    { key: "east", text: "東日本（静岡・長野・新潟より東）にありますか？" },
+    { key: "sea", text: "海に面していますか？" },
+    { key: "honshu", text: "本州にありますか？" },
+    { key: "shinkansen", text: "新幹線が通っていますか？" },
+    { key: "bigCity", text: "政令指定都市（または東京23区）がありますか？" },
+    { key: "worldHeritage", text: "世界遺産がありますか？" },
+    { key: "snow", text: "冬は雪がたくさん降る地域ですか？" },
+    { key: "kanto", text: "関東地方ですか？" },
+    { key: "kansai", text: "関西（近畿）地方ですか？" },
+    { key: "shikoku", text: "四国地方ですか？" },
+    { key: "kyushu", text: "九州地方ですか？" },
+    { key: "fruit", text: "フルーツ（みかん・桃・ぶどう・さくらんぼ等）の産地として有名ですか？" },
+    { key: "onsen", text: "全国的に有名な温泉地がありますか？" },
+    { key: "fuji", text: "富士山に面していますか？" },
+    { key: "udon", text: "「うどん県」といえばここですか？" },
+    { key: "themePark", text: "超大型の有名テーマパークがありますか？" },
+    { key: "tea", text: "日本茶（緑茶・宇治茶など）の生産で有名ですか？" },
+    { key: "apple", text: "りんごの生産が盛んですか？" },
+    { key: "shrine", text: "日本を代表する超有名な神社（伊勢神宮・出雲大社）がありますか？" },
+    { key: "ramen", text: "とんこつラーメンが有名ですか？" },
+    { key: "island", text: "本州・四国・九州以外の「島」がメインですか？" },
+    { key: "lake", text: "日本一大きな湖がありますか？" },
+    { key: "deer", text: "公園に野生の鹿がたくさんいますか？" },
+    { key: "sand", text: "日本最大級の砂丘がありますか？" },
+    { key: "dinosaur", text: "恐竜の化石がたくさん
