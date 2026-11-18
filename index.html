@@ -288,4 +288,126 @@
     { key: "lake", text: "日本一大きな湖がありますか？" },
     { key: "deer", text: "公園に野生の鹿がたくさんいますか？" },
     { key: "sand", text: "日本最大級の砂丘がありますか？" },
-    { key: "dinosaur", text: "恐竜の化石がたくさん
+    { key: "dinosaur", text: "恐竜の化石がたくさん見つかることで有名ですか？" },
+    { key: "natto", text: "納豆の生産が日本一ですか？" },
+    { key: "rice", text: "ブランド米（コシヒカリなど）の産地として特に有名ですか？" },
+    { key: "car", text: "自動車産業が日本一盛んですか？" },
+    { key: "dance", text: "夏の「阿波おどり」が有名ですか？" },
+    { key: "fish", text: "カツオのたたきが名物ですか？" },
+    { key: "ceramic", text: "焼き物（有田焼・伊万里焼）が有名ですか？" }
+  ];
+
+  let candidates = [];
+  let askedKeys = [];
+  let questionCount = 0;
+  let currentQuestion = null;
+
+  function initGame() {
+    candidates = [...prefectures];
+    askedKeys = [];
+    questionCount = 0;
+    document.getElementById("buttons").style.display = "flex";
+    document.getElementById("reset").style.display = "none";
+    nextQuestion();
+  }
+
+  function nextQuestion() {
+    // 候補が1つ以下になったら結果発表
+    if (candidates.length <= 1) {
+      showResult();
+      return;
+    }
+
+    // 残りの候補を最も効率よく半分に分けられる質問を探す
+    let bestQ = null;
+    let bestDiff = Infinity;
+
+    for (let q of questions) {
+      if (askedKeys.includes(q.key)) continue;
+
+      let yesCount = candidates.filter(p => Boolean(p[q.key])).length;
+      let noCount = candidates.length - yesCount;
+
+      // 候補を絞り込めない質問（全員Yesか全員No）はスキップ
+      if (yesCount === 0 || noCount === 0) continue;
+
+      let diff = Math.abs(yesCount - noCount);
+      if (diff < bestDiff) {
+        bestDiff = diff;
+        bestQ = q;
+      }
+    }
+
+    // もう絞り込める質問がなければ結果発表
+    if (!bestQ) {
+      showResult();
+      return;
+    }
+
+    currentQuestion = bestQ;
+    askedKeys.push(bestQ.key);
+    questionCount++;
+
+    // UI更新
+    document.getElementById("q-num").innerText = `第 ${questionCount} 問`;
+    document.getElementById("remain-count").innerText = `残り候補: ${candidates.length}都道府県`;
+    
+    // プログレスバー計算（47から1に近づくほど100%になる）
+    let progressPercent = Math.min(95, Math.max(5, Math.round(((47 - candidates.length) / 46) * 100)));
+    document.getElementById("progress").style.width = `${progressPercent}%`;
+
+    document.getElementById("question").innerText = currentQuestion.text;
+  }
+
+  function answer(isYes) {
+    if (isYes !== null) {
+      // 「はい」または「いいえ」の場合、条件に合う都道府県だけ残す
+      candidates = candidates.filter(p => Boolean(p[currentQuestion.key]) === isYes);
+    }
+    nextQuestion();
+  }
+
+  function showResult() {
+    document.getElementById("progress").style.width = "100%";
+    document.getElementById("buttons").style.display = "none";
+    document.getElementById("reset").style.display = "block";
+    document.getElementById("remain-count").innerText = "特定完了！";
+
+    const qElement = document.getElementById("question");
+
+    if (candidates.length === 1) {
+      const winner = candidates[0];
+      qElement.innerHTML = `
+        <div class="result-box">
+          🎉 ズバリ、あなたの住んでいるのは…
+          <span class="result-pref">${winner.name}</span>
+          <span class="result-desc">${winner.desc}</span>
+        </div>`;
+    } else if (candidates.length > 1) {
+      // 質問が尽きて複数残った場合
+      const names = candidates.map(c => c.name).join(" ・ ");
+      qElement.innerHTML = `
+        <div class="result-box">
+          🤔 絞りきれませんでした！この中のどれかですね？
+          <span class="result-pref" style="font-size: 22px;">${names}</span>
+        </div>`;
+    } else {
+      // 矛盾する回答で0件になった場合
+      qElement.innerHTML = `
+        <div class="result-box">
+          💦 該当する都道府県が見つかりませんでした…<br>
+          <span class="result-desc">もしかして海外にお住まいですか？もう一度試してみてね！</span>
+        </div>`;
+    }
+  }
+
+  function resetGame() {
+    initGame();
+  }
+
+  // ゲーム開始
+  initGame();
+</script>
+
+</body>
+</html>
